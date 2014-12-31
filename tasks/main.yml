@@ -1,0 +1,29 @@
+---
+- name: Install required MYSQL packages.
+  action: apt pkg={{ item }} state=installed
+  with_items:
+    - mysql-server
+    - mysql-client
+    - python-mysqldb
+
+- name: start MySQL service
+  service: name=mysql state=restarted
+
+- name: setup MySQL root password
+  mysql_user: name={{ mysql_root_user }} password={{ mysql_root_password }} host={{ item }} state=present
+  with_items:
+    - "{{ ansible_hostname }}" #gets the host name
+    - 127.0.0.1
+    - ::1
+    - localhost
+
+- name: delete blank MySQL users
+  mysql_user: name="" host={{ item }} state=absent
+  with_items:
+    - "{{ ansible_hostname }}"
+    - 127.0.0.1
+    - ::1
+    - localhost
+
+- name: drop MySQL test database
+  mysql_db: name=test state=absent
