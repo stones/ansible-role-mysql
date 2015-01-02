@@ -6,9 +6,6 @@
     - mysql-client
     - python-mysqldb
 
-- name: copy .my.cnf file with root password credentials
-  template: src=my.cnf.j2 dest=/root/.my.cnf mode=0600
-
 - name: start MySQL service
   service: name=mysql state=restarted
 
@@ -20,8 +17,12 @@
     - ::1
     - localhost
 
+#This NOT a configuration file, it is used for password less logins    
+- name: copy .my.cnf file with root password credentials
+  template: src=my.cnf.j2 dest=/root/.my.cnf mode=0600
+
 - name: delete blank MySQL users
-  mysql_user: name="" host={{ item }} state=absent login_user={{ mysql_root_user }} login_password={{ mysql_root_password }}
+  mysql_user: name="" host={{ item }} state=absent 
   with_items:
     - "{{ ansible_hostname }}"
     - 127.0.0.1
@@ -29,4 +30,4 @@
     - localhost
 
 - name: drop MySQL test database
-  mysql_db: name=test state=absent login_user={{ mysql_root_user }} login_password={{ mysql_root_password }}
+  mysql_db: name=test state=absent
